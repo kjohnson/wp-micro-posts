@@ -20,6 +20,10 @@ Inspired by the upcoming book "Indie Microblogging: owning your short-form writi
 
 == Changelog ==
 
+= 1.0.1 =
+
+* Fixed fatal error on case-sensitive filesystems.
+
 = 1.0.0 =
 
 * Initial release.
