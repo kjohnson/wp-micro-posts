@@ -48,7 +48,7 @@ final class MicroPosts_Plugin
 
     public function config( $file_name )
     {
-        return include $this->dir( 'includes/Config/' . $file_name . '.php' );
+        return include $this->dir( 'includes/config/' . $file_name . '.php' );
     }
 
     public function template( $file, $args = array() )
