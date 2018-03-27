@@ -87,10 +87,11 @@ final class MicroPosts_PostType
     public static function the_content( $content )
     {
         global $post;
-        if ( self::POST_TYPE == $post->post_type ) {
-          // Make hyperlinks clickable by default.
-          $content = self::make_clickable( $content );
+        if ( ! is_feed() && self::POST_TYPE == $post->post_type && apply_filters( 'micro_posts_make_clickable', true ) ) {
+            // Make hyperlinks clickable by default.
+            $content = self::make_clickable( $content );
         }
+
         return $content;
     }
 
