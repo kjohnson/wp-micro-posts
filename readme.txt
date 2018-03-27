@@ -1,5 +1,5 @@
 === Micro Posts ===
-Contributors: kbjohnson90
+Contributors: kbjohnson90, ianmjones
 Donate Link: http://kylebjohnson.me
 Tags: microblogging, indie, independent, short-form, minimalist, writing, posts, post type
 Requires at least: 4.5
@@ -22,6 +22,7 @@ Inspired by the upcoming book "Indie Microblogging: owning your short-form writi
 
 = 1.0.1 =
 
+* Added Micro Posts to home page's posts list and RSS feed.
 * Fixed fatal error on case-sensitive filesystems.
 
 = 1.0.0 =
