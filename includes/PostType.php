@@ -15,6 +15,8 @@ final class MicroPosts_PostType
         add_filter( 'post_row_actions',    array( __CLASS__, 'post_row_actions' ), 10, 2 );
         add_filter( 'the_title',           array( __CLASS__, 'the_title'        ), 10, 2 );
         add_filter( 'the_content',         array( __CLASS__, 'the_content'      ), 10, 2 );
+        add_filter( 'request',             array( __CLASS__, 'request'          ) );
+        add_filter( 'the_title_rss',       array( __CLASS__, 'the_title_rss'    ) );
     }
 
     /**
@@ -31,15 +33,17 @@ final class MicroPosts_PostType
 
     public static function update_title( $data, $postarr )
     {
-      if( self::POST_TYPE == $data[ 'post_type' ] ){
+        if ( self::POST_TYPE == $data['post_type'] ) {
 
-        // Mirror the content as the title. Update with changes.
-        $data[ 'post_title' ] = $data[ 'post_content' ];
+            // For best interop with micro.blog, never have a title.
+            // See http://help.micro.blog/2016/cross-posting-twitter/
+            $data['post_title'] = '';
 
-        // Add timestamp slug, if not already set.
-        $data[ 'post_name' ] = ( $data[ 'post_name' ] ) ? $data[ 'post_name' ] : time();
-      }
-      return $data;
+            // Add timestamp slug, if not already set.
+            $data['post_name'] = ( $data['post_name'] ) ? $data['post_name'] : time();
+        }
+
+        return $data;
     }
 
     public static function post_row_actions($actions, $post)
@@ -53,13 +57,31 @@ final class MicroPosts_PostType
 
     public static function the_title( $title, $id = null )
     {
-      if ( self::POST_TYPE == get_post_type( $id ) ) {
+      if ( ! is_home() && self::POST_TYPE == get_post_type( $id ) ) {
         $post = get_post( $id );
         if( ! is_wp_error( $post ) ){
             $title = date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $post->post_date ) );
         }
       }
       return $title;
+    }
+
+    /**
+     * Handler for the `the_title_rss` filter.
+     *
+     * @param string $title
+     *
+     * @return string
+     */
+    public static function the_title_rss( $title )
+    {
+        $post = get_post();
+
+        if ( self::POST_TYPE == $post->post_type ) {
+            $title = '';
+        }
+
+        return $title;
     }
 
     public static function the_content( $content )
@@ -83,5 +105,26 @@ final class MicroPosts_PostType
       $text = preg_replace('/(?<!\S)#([0-9a-zA-Z]+)/', '<a href="' . esc_url( add_query_arg( 's', urlencode( '#' ) . '$1', get_site_url() ) ) . '">#$1</a>', $text);
 
       return $text;
+    }
+
+    /**
+     * @param array $request
+     *
+     * @return mixed
+     */
+    public static function request( $request )
+    {
+        $query = new WP_Query();  // Query isn't run if we don't pass any query vars.
+        $query->parse_query( $request );
+
+        if ( $query->is_feed() || $query->is_home() ) {
+            if ( isset( $request['post_type'] ) ) {
+                $request['post_type'][] = self::POST_TYPE;
+            } else {
+                $request['post_type'] = array( 'post', self::POST_TYPE );
+            }
+        }
+
+        return $request;
     }
 }
